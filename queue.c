@@ -19,6 +19,9 @@ struct list_head *q_new()
     return head;
 }
 
+#define max(x, y) (x) > (y) ? (x) : (y)
+#define min(x, y) (x) < (y) ? (x) : (y)
+
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
@@ -81,13 +84,31 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head)
+        return NULL;
+    if (head->next == head)
+        return NULL;
+    struct list_head *first = head->next;
+    element_t *temp = container_of(first, element_t, list);
+    strncpy(sp, temp->value, min(strlen(temp->value) + 1, bufsize));
+
+    list_del(first);
+    return temp;
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head)
+        return NULL;
+    if (head->next == head)
+        return NULL;
+    struct list_head *last = head->prev;
+    element_t *temp = container_of(last, element_t, list);
+    strncpy(sp, temp->value, min(strlen(temp->value) + 1, bufsize));
+
+    list_del(last);
+    return temp;
 }
 
 /* Return number of elements in queue */
