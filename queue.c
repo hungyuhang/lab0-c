@@ -232,8 +232,57 @@ void q_reverseK(struct list_head *head, int k)
     return;
 }
 
+static bool isbigger(struct list_head *node1, struct list_head *node2)
+{
+    element_t *ele1 = container_of(node1, element_t, list);
+    element_t *ele2 = container_of(node2, element_t, list);
+    char *str1 = ele1->value;
+    char *str2 = ele2->value;
+    if (strcmp(str1, str2) > 0)
+        return true;
+    else
+        return false;
+}
+
+static bool issmaller(struct list_head *node1, struct list_head *node2)
+{
+    element_t *ele1 = container_of(node1, element_t, list);
+    element_t *ele2 = container_of(node2, element_t, list);
+    char *str1 = ele1->value;
+    char *str2 = ele2->value;
+    if (strcmp(str1, str2) < 0)
+        return true;
+    else
+        return false;
+}
+
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head)
+        return;
+    if (q_size(head) < 2)
+        return;
+    struct list_head *dirty = head->next->next;
+    struct list_head *probe;
+    struct list_head *temp;
+    bool (*cmp_func)(struct list_head *, struct list_head *);
+    if (descend)
+        cmp_func = &issmaller;
+    else
+        cmp_func = &isbigger;
+    while (dirty != head) {
+        for (probe = dirty->prev; probe != head; probe = probe->prev) {
+            if (!cmp_func(probe, dirty))
+                break;
+        }
+        temp = dirty->next;
+        list_del(dirty);
+        list_add(dirty, probe);
+        dirty = temp;
+    }
+    return;
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
