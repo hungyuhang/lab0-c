@@ -15,20 +15,23 @@
 struct list_head *q_new()
 {
     struct list_head *head = malloc(sizeof(struct list_head));
-    head->prev = head->next = head;
+    if (head != NULL)
+        INIT_LIST_HEAD(head);
     return head;
 }
 
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
+    if (!l)
+        return;
     struct list_head *curr = l->next;
     struct list_head *next;
-
     while (curr != l) {
         next = curr->next;
         element_t *temp = container_of(curr, element_t, list);
-        free(temp->value);
+        if (temp->value != NULL)
+            free(temp->value);
         free(temp);
         curr = next;
     }
@@ -172,6 +175,9 @@ void q_swap(struct list_head *head)
 /* Reverse elements in queue */
 void q_reverse(struct list_head *head)
 {
+    if (!head)
+        return;
+
     struct list_head *node;
     struct list_head *temp;
 
@@ -190,6 +196,10 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head)
+        return;
+    if (k <= 0)
+        return;
     if (q_size(head) < k)
         return;
     struct list_head *front = head->next;
