@@ -204,33 +204,22 @@ void q_reverseK(struct list_head *head, int k)
         return;
     if (q_size(head) < k)
         return;
-    struct list_head *front = head->next;
-    struct list_head *curr;
-    struct list_head *rear;
-    struct list_head *temp;
-    int cnt = 1;
-    for (rear = head->next; rear != head; rear = rear->next) {
-        if (cnt == k) {
-            curr = front;
-            while (true) {
-                temp = curr->next;
-                curr->next = curr->prev;
-                curr->prev = temp;
-                if (curr == rear)
-                    break;
-                curr = curr->prev;
+    struct list_head stack;
+    struct list_head result;
+    INIT_LIST_HEAD(&stack);
+    INIT_LIST_HEAD(&result);
+    while (!list_empty(head)) {
+        list_move(head->next, &stack);
+        if (q_size(&stack) == k) {
+            while (!list_empty(&stack)) {
+                list_move_tail(stack.next, &result);
             }
-            front->next->next = rear;
-            rear->prev->prev = front;
-            temp = front->next;
-            front->next = rear->prev;
-            rear->prev = temp;
-            cnt = 0;
-            rear = front;
-            front = front->next;
         }
-        cnt++;
     }
+    while (!list_empty(&stack)) {
+        list_move_tail(stack.prev, &result);
+    }
+    list_splice(&result, head);
     return;
 }
 
