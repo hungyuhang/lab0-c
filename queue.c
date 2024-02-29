@@ -324,7 +324,36 @@ void q_sort(struct list_head *head, bool descend)
 int q_ascend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!head || list_empty(head))
+        return 0;
+    if (list_is_singular(head))
+        return 1;
+
+    struct list_head *front;
+    struct list_head *rear;
+    element_t *element;
+    bool done = false;
+    while (!done) {
+        if (q_size(head) <= 1)
+            break;
+        front = head->next;
+        rear = front->next;
+        done = true;
+        while (rear != head) {
+            if (isbigger(front, rear)) {
+                list_del(front);
+                element = list_entry(front, element_t, list);
+                if (element) {
+                    free(element->value);
+                    free(element);
+                }
+                done = false;
+            }
+            front = rear;
+            rear = rear->next;
+        }
+    }
+    return q_size(head);
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
@@ -332,7 +361,36 @@ int q_ascend(struct list_head *head)
 int q_descend(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-nodes-from-linked-list/
-    return 0;
+    if (!head || list_empty(head))
+        return 0;
+    if (list_is_singular(head))
+        return 1;
+
+    struct list_head *front;
+    struct list_head *rear;
+    element_t *element;
+    bool done = false;
+    while (!done) {
+        if (q_size(head) <= 1)
+            break;
+        front = head->next;
+        rear = front->next;
+        done = true;
+        while (rear != head) {
+            if (issmaller(front, rear)) {
+                list_del(front);
+                element = list_entry(front, element_t, list);
+                if (element) {
+                    free(element->value);
+                    free(element);
+                }
+                done = false;
+            }
+            front = rear;
+            rear = rear->next;
+        }
+    }
+    return q_size(head);
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending/descending
