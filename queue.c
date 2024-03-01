@@ -397,6 +397,59 @@ int q_descend(struct list_head *head)
  * order */
 int q_merge(struct list_head *head, bool descend)
 {
-    // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    /* Use the concept of merge sort to merge different queues together */
+
+    /* Handle special cases */
+    if (!head)
+        return 0;
+    if (q_size(head) == 0)
+        return 0;
+    if (q_size(head) == 1)
+        return list_entry(head->next, queue_contex_t, chain)->size;
+
+    /* Seperate queue chain into two part, each part might contains multiple
+     * queues */
+    struct list_head *slow = head->next;
+    struct list_head head_left;
+    for (struct list_head *fast = head->next;
+         fast != head && fast->next != head;
+         fast = fast->next->next, slow = slow->next) {
+    }
+    list_cut_position(&head_left, head, slow->prev);
+
+    /* Perform q_merge on two chain of queues */
+    q_merge(&head_left, descend);
+    q_merge(head, descend);
+
+    /* Merge two sorted queues on different chains together */
+    struct list_head result;
+    struct list_head *q_left =
+        list_entry(head_left.next, queue_contex_t, chain)->q;
+    struct list_head *q_right =
+        list_entry(head->next, queue_contex_t, chain)->q;
+    bool (*cmp_func)(struct list_head *, struct list_head *);
+    if (descend)
+        cmp_func = &isbigger;
+    else
+        cmp_func = &issmaller;
+    INIT_LIST_HEAD(&result);
+    while (!list_empty(q_left) && !list_empty(q_right)) {
+        if (cmp_func(q_left->next, q_right->next)) {
+            list_move_tail(q_left->next, &result);
+        } else {
+            list_move_tail(q_right->next, &result);
+        }
+    }
+    while (!list_empty(q_left))
+        list_move_tail(q_left->next, &result);
+    while (!list_empty(q_right))
+        list_move_tail(q_right->next, &result);
+    list_splice(&result, q_left);
+    list_entry(head_left.next, queue_contex_t, chain)->size = q_size(q_left);
+    list_entry(head->next, queue_contex_t, chain)->size = q_size(q_right);
+
+    /* Merge two chain of queues back to one chain */
+    list_splice(&head_left, head);
+
+    return list_entry(head->next, queue_contex_t, chain)->size;
 }
