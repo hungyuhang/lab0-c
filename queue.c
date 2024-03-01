@@ -294,28 +294,45 @@ static bool issmaller(struct list_head *node1, struct list_head *node2)
 /* Sort elements of queue in ascending/descending order */
 void q_sort(struct list_head *head, bool descend)
 {
+    /* handle special case */
     if (!head)
         return;
-    if (q_size(head) < 2)
+    if (q_size(head) <= 1)
         return;
-    struct list_head *dirty = head->next->next;
-    struct list_head *probe;
-    struct list_head *temp;
+
+    /* seperate the unsorted list to two sublists */
+    struct list_head *slow = head->next;
+    struct list_head head_left;
+    for (struct list_head *fast = head->next;
+         fast != head && fast->next != head;
+         fast = fast->next->next, slow = slow->next) {
+    }
+    list_cut_position(&head_left, head, slow->prev);
+
+    /* sort two sublists */
+    q_sort(&head_left, descend);
+    q_sort(head, descend);
+
+    /* merge two sublists together */
+    struct list_head result;
     bool (*cmp_func)(struct list_head *, struct list_head *);
     if (descend)
-        cmp_func = &issmaller;
-    else
         cmp_func = &isbigger;
-    while (dirty != head) {
-        for (probe = dirty->prev; probe != head; probe = probe->prev) {
-            if (!cmp_func(probe, dirty))
-                break;
+    else
+        cmp_func = &issmaller;
+    INIT_LIST_HEAD(&result);
+    while (!list_empty(&head_left) && !list_empty(head)) {
+        if (cmp_func(head_left.next, head->next)) {
+            list_move_tail(head_left.next, &result);
+        } else {
+            list_move_tail(head->next, &result);
         }
-        temp = dirty->next;
-        list_del(dirty);
-        list_add(dirty, probe);
-        dirty = temp;
     }
+    while (!list_empty(&head_left))
+        list_move_tail(head_left.next, &result);
+    while (!list_empty(head))
+        list_move_tail(head->next, &result);
+    list_splice(&result, head);
     return;
 }
 
