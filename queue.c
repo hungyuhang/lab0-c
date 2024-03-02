@@ -328,10 +328,10 @@ void q_sort(struct list_head *head, bool descend)
             list_move_tail(head->next, &result);
         }
     }
-    while (!list_empty(&head_left))
-        list_move_tail(head_left.next, &result);
-    while (!list_empty(head))
-        list_move_tail(head->next, &result);
+    if (!list_empty(&head_left))
+        list_splice_tail_init(&head_left, &result);
+    if (!list_empty(head))
+        list_splice_tail_init(head, &result);
     list_splice(&result, head);
     return;
 }
