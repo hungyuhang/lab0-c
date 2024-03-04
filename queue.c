@@ -90,8 +90,10 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
         return NULL;
     struct list_head *first = head->next;
     element_t *temp = container_of(first, element_t, list);
-    strncpy(sp, temp->value, bufsize);
-    sp[bufsize - 1] = '\0';
+    if (temp->value && sp) {
+        strncpy(sp, temp->value, bufsize);
+        sp[bufsize - 1] = '\0';
+    }
 
     list_del(first);
     return temp;
@@ -106,8 +108,10 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
         return NULL;
     struct list_head *last = head->prev;
     element_t *temp = container_of(last, element_t, list);
-    strncpy(sp, temp->value, bufsize);
-    sp[bufsize - 1] = '\0';
+    if (temp->value && sp) {
+        strncpy(sp, temp->value, bufsize);
+        sp[bufsize - 1] = '\0';
+    }
 
     list_del(last);
     return temp;
